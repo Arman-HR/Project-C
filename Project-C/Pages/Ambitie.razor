@@ -1,0 +1,86 @@
+@using Model
+<PageTitle>Ambitie</PageTitle>
+
+@code {
+    private static Guid OGSM_ID {get; set;}
+    protected override void OnInitialized()
+    {
+        // Get the URL
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+
+        // Get the query parameters
+        var queryString = uri.Query;
+
+        // Parse the query string to retrieve specific parameters
+        var queryParameters = System.Web.HttpUtility.ParseQueryString(queryString);
+
+        // Retrieve the 'ID' parameter
+        var stringID = queryParameters["ID"];
+
+        // Convert to Guid
+        OGSM_ID = new Guid(stringID);
+
+        Console.WriteLine($"Ambition OGSM ID: {OGSM_ID}");
+        inputList = Load();
+    }
+}
+
+<div style="display: flex; justify-content: flex-end;">
+    <ul>
+        @foreach (var ambition in inputList)
+        {
+            <li style="display: flex; align-items: center; justify-content: flex-start; margin-right: 750px">
+                <input type="checkbox" class="larger-checkbox" @bind="ambition.IsDone"/>   
+                <input @bind="ambition.Title" readonly/>
+            </li>
+        }
+    </ul>
+
+    <div style="margin-top: 0px;" >
+        <input placeholder="New Ambition" @bind="userInput" />
+        <button style="margin-left: 10px; " @onclick="Add">Update</button>
+    </div>
+</div>
+
+<style>
+    /* Define a custom class for the checkbox */
+    .larger-checkbox input[type="checkbox"] {
+        /* Increase the size of the checkbox */
+        transform: scale(1.5);
+    }
+</style>
+
+@code {
+    [Inject]
+    private NavigationManager NavigationManager { get; set; }
+}
+
+@code {
+    private string userInput = "";
+    private List<TodoItem> inputList = new List<TodoItem>();
+
+    private void Add()
+    {
+        if (userInput != null && userInput != "")
+        {
+            Controller_OGSMs.SetNewAmbition(OGSM_ID, userInput);
+            inputList = new List<TodoItem>(){new TodoItem { ID = OGSM_ID, Title = userInput }};
+            userInput = "";
+        }
+        
+    }
+
+    private static List<TodoItem> Load()
+    {
+        Model.OGSM current_OGSM = Controller_OGSMs.GetOGSM_byID(OGSM_ID);
+        
+        if (current_OGSM is not null)
+        {   
+            List<TodoItem> ogsm = new List<TodoItem>(){new TodoItem { ID = current_OGSM.ID, Title = current_OGSM.Ambition }};
+            return ogsm;
+        }
+        
+        Console.WriteLine("OGSM not found");
+        return new List<TodoItem>();
+    }
+}

@@ -1,0 +1,113 @@
+@page "/Overview"
+
+@code {
+    private static Guid Manager_ID {get; set;}
+    protected override void OnInitialized()
+    {
+        // Get the URL
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+
+        // Get the query parameters
+        var queryString = uri.Query;
+
+        // Parse the query string to retrieve specific parameters
+        var queryParameters = System.Web.HttpUtility.ParseQueryString(queryString);
+
+        // Retrieve the 'ID' parameter
+        var stringID = queryParameters["ID"];
+
+        // Convert to Guid
+        Manager_ID = new Guid(stringID);
+
+
+    }
+}
+
+<PageTitle>OGSM</PageTitle>
+<h1>Overview</h1>
+
+
+<div class="container">
+    <div class="box Actions_Overview">
+        <p>Actions Overview</p>
+        <Actions_Overview />
+    </div>
+</div>
+
+<div class="container2">
+    <div class="box2 Employees_Overview">
+        <p>Employees Overview</p>
+        <Users_Overview />
+    </div>
+</div>
+
+<style>
+    .container {
+        position: relative;
+    }
+
+    .box {
+        position: absolute;
+        background-color: green;
+        color: white;
+        padding: 20px;
+        width: 300px;
+    }
+
+    .Actions_Overview {
+        top: 50px;
+        left: 1100px; 
+        height: 750px; 
+    }
+</style>
+
+<style>
+    .container2 {
+        position: relative;
+    }
+
+    .box2 {
+        position: absolute;
+        background-color: blueviolet;
+        color: white;
+        padding: 20px;
+        width: 300px;
+    }
+
+    .Employees_Overview {
+        top: 50px;
+        left: 850px; 
+        height: 750px; 
+    }
+</style>
+
+
+<style>
+    .CreateAccountButton-container {
+        position: absolute;
+        top: 200px;
+        left: 25px;
+        font-size: 50px;
+    }
+</style>
+
+<div class="CreateAccountButton-container">
+    <button class="Custom-button" @onclick="CreateAccount">Add Employees</button>
+</div>
+
+
+@code {
+
+    [Inject]
+    private NavigationManager NavigationManager { get; set; }
+    private void CreateAccount()
+    {
+        // Navigate to the "Create Account page" page
+        @* NavigationManager.NavigateTo($"/CreateAccountPage"); *@
+        @* Controller_Users.AddMockUser(Manager_ID); *@
+        if (NavigationManager is not null)
+        {
+            NavigationManager.NavigateTo($"/Createaccountpage?ID={Manager_ID}");
+        }
+    }
+}

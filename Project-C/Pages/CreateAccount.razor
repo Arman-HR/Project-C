@@ -1,0 +1,123 @@
+@page "/CreateAccountPage"
+@using Model
+
+@code {
+    private static Guid Manager_ID {get; set;}
+    protected override void OnInitialized()
+    {
+        // Get the URL
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+
+        // Get the query parameters
+        var queryString = uri.Query;
+
+        // Parse the query string to retrieve specific parameters
+        var queryParameters = System.Web.HttpUtility.ParseQueryString(queryString);
+
+        // Retrieve the 'ID' parameter
+        var stringID = queryParameters["ID"];
+
+        // Convert to Guid
+        Manager_ID = new Guid(stringID);
+    }
+}
+
+<PageTitle>Createaccountpage</PageTitle>
+
+
+<style>
+    .CreateAccount {
+        width: 700px;
+        height: 100px;
+        background-color: #7ab51d;
+        border: 2px solid #000000; 
+        border-radius: 25px;
+        margin: 35px auto;
+        text-align: center;
+        padding: 20px;
+    }
+    .CreateAccount p {
+        font-size: 45px;
+        color: #333;
+    }
+</style>
+
+<div class="CreateAccount">
+    <p>Add new users here</p>
+</div>
+
+<style>
+    .CreateAccountForm-container {
+        height: 450px;
+        width: 700px; 
+        margin: 10px auto;
+        background-color: #7ab51d;
+        border: 2px solid #000000; 
+        padding: 20px;
+        border-radius: 25px;
+        display: flex;
+        flex-direction: column;
+    }
+    .CreateAccountForm-container .form-field {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    .CreateAccountForm-container .SubmitButton {
+        margin-top: 350px;
+        width: 80px;
+        height: 40px;
+        font-size: 16px;
+        position: absolute;
+        right: 550px;
+    }
+</style>
+
+<div class="CreateAccountForm-container">
+        <div class="form-field">
+            <p class="small-text">First Name</p>
+            <input class="input-veld" placeholder="Enter First Name" @bind="Firstname" />
+        </div>
+
+        <div class="form-field">
+            <p class="small-text">Last Name</p>
+            <input class="input-veld" placeholder="Enter Last Name" @bind="Lastname" />
+        </div>
+
+        <div class="form-field">
+            <p class="small-text">Email</p>
+            <input class="input-veld" placeholder="Enter Email" @bind="Email" />
+        </div>
+
+        <div class="form-field">
+            <p class="small-text">Password</p>
+            <input class="input-veld" placeholder="Enter password" @bind="password" />
+        </div>
+
+        <button class="SubmitButton" @onclick="CreateNewAccount">Submit</button>
+</div>
+
+
+@code {
+
+    private string Firstname = "";
+    private string Lastname = "";
+    private string Email = "";
+    private string password = "";
+    
+    [Inject]
+    private NavigationManager NavigationManager { get; set; }
+    private void CreateNewAccount()
+    {
+        if (NavigationManager != null && !string.IsNullOrWhiteSpace(Firstname) && !string.IsNullOrWhiteSpace(Lastname) && !string.IsNullOrWhiteSpace(Email) && !string.IsNullOrWhiteSpace(password) && Manager_ID != default) // later hier kijken of het overeenkomt met de gegevens van de database
+        {
+            Users new_user = new Users(Guid.NewGuid(), Email, Firstname, Lastname, password, "User");
+            Controller_Users.AddUser(new_user, Manager_ID);
+            Firstname = "";
+            Lastname = "";
+            Email = "";                      
+            password = ""; 
+        }
+    }
+}

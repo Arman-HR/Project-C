@@ -1,0 +1,102 @@
+@using Model
+<PageTitle>Users_Overview</PageTitle>
+
+@code {
+    private static Guid Manager_ID {get; set;}
+    protected override void OnInitialized()
+    {
+        // Get the URL
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+
+        // Get the query parameters
+        var queryString = uri.Query;
+
+        // Parse the query string to retrieve specific parameters
+        var queryParameters = System.Web.HttpUtility.ParseQueryString(queryString);
+
+        // Retrieve the 'ID' parameter
+        var stringID = queryParameters["ID"];
+
+        // Convert to Guid
+        Manager_ID = new Guid(stringID);
+      
+        inputList = Load();
+    }
+}
+
+<h1>(@inputList.Count())</h1>
+
+
+<style>
+    /* Define a custom class for the checkbox */
+    .larger-checkbox input[type="checkbox"] {
+        /* Increase the size of the checkbox */
+        transform: scale(1.5);
+    }
+</style>
+
+
+
+<ul>
+    @foreach (var user in inputList)
+    {
+        <!-- Apply the custom class to the checkbox -->
+        <div class="larger-checkbox">
+            <input type="checkbox" @bind="user.IsDone" onclick="@(() => HandleCheckboxClick(user))"/>
+            <textarea @bind="user.Title" readonly></textarea>
+            @{
+                var maxLength = 50;
+
+                // Checking the length of the text and adding a newline if it exceeds maxLength
+                if (user.Title.Length > maxLength)
+                {
+                    user.Title = user.Title.Substring(0, maxLength) + "\n" + user.Title.Substring(maxLength);
+                }
+            }
+        </div>
+    }
+</ul>
+
+@code{
+    void HandleCheckboxClick(TodoItem user)
+    {
+        foreach (var u in inputList)
+        {
+            if (user == u)
+            {
+                UncheckAllExcept(user);
+            }
+        }
+    }
+
+    void UncheckAllExcept(TodoItem user)
+    {
+        foreach (var u in inputList)
+        {
+            if (user != u)
+            {
+                u.IsDone = false;
+            }
+        }
+    }
+}
+
+@code {
+    [Inject]
+    private NavigationManager NavigationManager { get; set; }
+}
+
+@code {
+
+    private List<TodoItem> inputList = new List<TodoItem>();
+    private static List<TodoItem> Load()
+    {
+        List<TodoItem> Users_For_This_Manager = Controller_Users.GetAllUsers(Manager_ID);
+        
+        if (Users_For_This_Manager.Count() == 0)
+        {
+            Console.WriteLine("No users found for this manager");
+        }
+        return Users_For_This_Manager;
+    }
+}

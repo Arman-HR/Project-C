@@ -1,0 +1,142 @@
+@using Model
+<PageTitle>Goal</PageTitle>
+
+@code {
+    private static Guid OGSM_ID {get; set;}
+    protected override void OnInitialized()
+    {
+        // Get the URL
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+
+        // Get the query parameters
+        var queryString = uri.Query;
+
+        // Parse the query string to retrieve specific parameters
+        var queryParameters = System.Web.HttpUtility.ParseQueryString(queryString);
+
+        // Retrieve the 'ID' parameter
+        var stringID = queryParameters["ID"];
+
+        // Convert to Guid
+        OGSM_ID = new Guid(stringID);
+
+        Console.WriteLine($"Goal OGSM ID: {OGSM_ID}");
+        inputList = Load();
+    }
+}
+
+<h1>(@inputList.Count())</h1>
+
+
+<style>
+    /* Define a custom class for the checkbox */
+    .larger-checkbox input[type="checkbox"] {
+        /* Increase the size of the checkbox */
+        transform: scale(1.5);
+    }
+</style>
+
+
+
+<ul>
+    @foreach (var goal in inputList)
+    {
+        <!-- Apply the custom class to the checkbox -->
+        <div class="larger-checkbox">
+            <input type="checkbox" @bind="goal.IsDone" onclick="@(() => HandleCheckboxClick(goal))"/>
+            <textarea @bind="goal.Title" readonly></textarea>
+            @{
+                var maxLength = 50; 
+
+                // Checking the length of the text and adding a newline if it exceeds maxLength
+                if (goal.Title.Length > maxLength)
+                {
+                    goal.Title = goal.Title.Substring(0, maxLength) + "\n" + goal.Title.Substring(maxLength);
+                }
+            }
+        </div>
+    }
+</ul>
+
+@code{
+    void HandleCheckboxClick(TodoItem goal)
+    {
+        foreach (var g in inputList)
+        {
+            if (goal == g)
+            {
+                UncheckAllExcept(goal);
+            }
+        }
+    }
+
+    void UncheckAllExcept(TodoItem goal)
+    {
+        foreach (var g in inputList)
+        {
+            if (goal != g)
+            {
+                g.IsDone = false;
+            }
+        }
+    }
+}
+
+@code {
+    [Inject]
+    private NavigationManager NavigationManager { get; set; }
+}
+
+
+<input placeholder="New Goal" @bind="userInput" />
+<button @onclick="Add">Add New</button>
+<button @onclick="Update">Update</button>
+
+@code {
+
+    private string userInput = "";
+    private List<TodoItem> inputList = new List<TodoItem>();
+
+
+    private void Add()
+    {
+        if (userInput != null && userInput != "")
+        {
+            Model.Goals new_goal = new(Guid.NewGuid(), userInput);
+            Controller_Goals.AddGoal(OGSM_ID, new_goal);
+            inputList.Add(new TodoItem { ID = new_goal.ID, Title = new_goal.Name });
+            userInput = "";
+            Console.WriteLine($"Goals ID {new_goal.ID}");
+        }
+    }
+
+    private void Update()
+    {
+        foreach (var goal in inputList)
+        {
+            if (goal.IsDone)
+            {
+                if (userInput != null && userInput != "")
+                {
+                    Controller_Goals.UpdateGoal(goal.ID, userInput);
+                    goal.Title = userInput;
+                    userInput = "";
+                    Console.WriteLine($"Updated Goal ID {goal.ID}");
+                }
+            }
+        }
+    }
+
+    private static List<TodoItem> Load()
+    {
+        Model.OGSM current_OGSM = Controller_OGSMs.GetOGSM_byID(OGSM_ID);
+        
+        if (current_OGSM is not null)
+        {
+            return Controller_Goals.GetGoals(current_OGSM);
+        }
+        
+        Console.WriteLine("OGSM not found");
+        return new List<TodoItem>();
+    }
+}

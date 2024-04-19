@@ -1,0 +1,203 @@
+@page "/"
+
+<PageTitle>Login page</PageTitle>
+
+@using Model
+@* @inject Controller_Users Controller_Users *@
+@inject NavigationManager NavigationManager
+<!-- 
+    <h1> Welcome to the log in page, please enter your email and password to continue</h1>
+-->
+
+<img src="/Images/Centric.png" width="250" style="position: absolute; top: 175px; left: 650px;" alt="OGSM Logo">
+<img src="/Images/OGSM.png" width="200" alt="CentricLogo">
+
+<style>
+    .RechthoekLogin {
+        width: 500px;
+        height: 300px;
+        background-color: #7ab51d;
+        border: 2px solid #7ab51d; 
+        border-radius: 25px;
+        margin: 125px;
+        margin-left: 520px;
+    }
+</style>
+
+<div class="RechthoekLogin"></div>
+
+<style>
+    .Email-container {
+        position: relative;
+        height: 75px;
+    }
+
+    .input-veld {
+        position: absolute;
+        top: -550px;
+        left: 665px;
+    }
+</style>
+
+<div class="Email-container">
+    <input class="input-veld" placeholder="Enter email" @bind="email" />
+</div>
+
+<style>
+    .Password-container {
+        position: relative;
+        height: 75px;
+    }
+
+    .input-veld {
+        position: absolute;
+        top: -350px;
+        left: 665px;
+    }
+</style>
+
+<div class="Password-container">
+    <input class="input-veld" placeholder="Enter password" @bind="password" />
+</div>
+
+<style>
+    .LoginText-container {
+        position: absolute;
+        top: 290px;
+        left: 725px;
+    }
+
+    .small-text {
+        font-size: 17px;
+        color: #333;
+    }
+</style>
+
+<div class="LoginText-container">
+    <p class="small-text">Email</p>
+</div>
+
+<style>
+    .PasswordText-container {
+        position: absolute;
+        top: 365px;
+        left: 725px;
+    }
+
+    .small-text {
+        font-size: 17px;
+        color: #333;
+    }
+</style>
+
+<div class="PasswordText-container">
+    <p class="small-text">Password</p>
+</div>
+
+<style>
+    .SignInButton-container {
+        position: absolute;
+        top: 470px;
+        left: 803px;
+    }
+
+    .Customize-button {
+        font-size: 17px;
+
+    }
+</style>
+
+<style>
+    .CreateAccountButton-container {
+        position: absolute;
+        top: 470px;
+        left: 663px;
+    }
+
+    .Customize-button {
+        font-size: 17px;
+
+    }
+</style>
+
+<div class="SignInButton-container">
+    <button class="custom-button" @onclick="SignIn">Sign in</button>
+</div>
+
+<div class="CreateAccountButton-container">
+    @* <button class="custom-button" @onclick="CreateAccount">Create Account</button> *@
+</div>
+
+<div>Project C: Arman, Jesse, Ying-Yu</div>
+
+
+
+@code {
+    private string email = "";
+    private string password = "";
+
+    private void SignIn()
+    {
+        if (NavigationManager != null && !string.IsNullOrWhiteSpace(email) && !string.IsNullOrWhiteSpace(password)) 
+        {
+            Users user = Controller_Users.GetUser(email, password); 
+
+            if (user is not null && user.User_type == "User")
+            {
+                NavigationManager.NavigateTo($"/menu?ID={user.ID}");
+            }
+            if (user is not null && user.User_type == "Manager")
+            {
+                NavigationManager.NavigateTo($"/Overview?ID={user.ID}");
+            }
+            if (user == null)
+            {
+                Console.WriteLine("failed!!");
+            }
+                
+        }
+    }
+
+    private void CreateAccount()
+    {
+        // To manually create manager accounts follow these steps:
+        // Step 1: Go to file Login.razor
+        // Step 2: Uncomment line 128: <button class="custom-button" @onclick="CreateAccount">Create Account</button>
+        // Step 3: Below Your new manager accounts: (line 188) add new managers like instructed in the examples.
+        // Make sure you add the Managers inside the new_managers list bellow line 187.
+        // Make sure each manager begins with Guid.NewGuid() for a new ID inside the database (see Example line 180).
+        // Make sure each manager ends with managertype to be sure you add a manager account (see Example 180).
+        // Make sure to use unique and not already used emails for the accounts to be registerd.
+        // Make sure to use correct syntax inside the new managers list! (don't use ; inside lists).
+        // Step 4: Do not forget the login information of the managers you are about to register (email, password).
+        // Step 5: Save the code.
+        // Step 6: Run the application.
+        // Step 7: When the loginscreen is loaded you will see a Create Account button, click the button once.
+        // Step 8: To confirm the new managers have been registerd, login or check the debug console for: "Regular User ...added." this should appear per registerd manager.
+        // Step 9: !! MAKE SURE YOU RE-COMMENT line 128 and save the code to remove the Create Account button. !!
+
+        string managertype = "Manager";
+
+        // Example manager accounts:
+
+            new Users(Guid.NewGuid(), "managerx@email.com", "firstname", "lastname", "managerx", managertype);
+            new Users(Guid.NewGuid(), "managery@email.com", "firstname", "lastname", "managery", managertype);
+
+        List<Users> new_managers = new List<Users>()
+        {
+            // Your new manager accounts:
+        
+        };
+
+        foreach (var manager in new_managers)
+        {
+            Controller_Users.AddUser(manager);
+        }
+
+    }
+
+    private void WrongUsernamePasswordText()
+    {
+
+    }
+}

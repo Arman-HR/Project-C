@@ -1,0 +1,103 @@
+﻿@page "/Menu"
+
+
+@using Model
+
+
+<PageTitle>Index</PageTitle>
+
+<h1>Main Menu</h1>
+
+
+@code {
+    private static Guid userID {get; set;}
+    protected override void OnInitialized()
+    {
+        // Get the URL
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+
+        // Get the query parameters
+        var queryString = uri.Query;
+
+        // Parse the query string to retrieve specific parameters
+        var queryParameters = System.Web.HttpUtility.ParseQueryString(queryString);
+
+        // Retrieve the 'ID' parameter
+        var stringID = queryParameters["ID"];
+
+        // Convert to Guid
+        userID = new Guid(stringID);
+
+        Console.WriteLine($"User ID: {userID}");
+        inputList = Load();
+    }
+}
+
+
+
+@* Navigating to OGSM *@
+@code {
+    [Inject]
+    private NavigationManager NavigationManager { get; set; }
+
+    private void MovetoOGSM(Guid OGSM_ID)
+    {
+        // Navigate to the "OGSM" page
+        Console.WriteLine($"OGSM ID: {OGSM_ID}");
+        NavigationManager.NavigateTo($"/OGSM?ID={OGSM_ID}");
+    }
+
+}
+
+@* Adding OGSM *@
+@code {
+    private string userInput = "";
+    private string errorMessage {get; set;}
+    private List<TodoItem> inputList = new List<TodoItem>();
+    
+    private static List<TodoItem> Load()
+    {
+        Users current_user = Controller_Users.GetUser_byID(userID);
+        if (current_user is not null)
+        {
+            return Controller_OGSMs.GetOGSMs(current_user);
+        }
+        Console.WriteLine("User not found");
+        return new List<TodoItem>();
+    }
+    async Task AddOGSM()
+    {
+        if (userInput.Length > 25)
+        {
+            errorMessage = "Title should not exceed 25 characters";
+            userInput = "";
+            return; 
+        }
+        if (userInput != null && userInput != "")
+        {
+            Model.OGSM new_ogsm = new Model.OGSM(Guid.NewGuid(), userInput);
+            Controller_OGSMs.AddOGSM(userID, new_ogsm);
+            inputList.Add(new TodoItem { ID = new_ogsm.ID, Title = userInput });
+            userInput = "";
+        }
+        errorMessage = null;
+    }
+
+}
+
+<div>
+    <input placeholder="Enter a title for your OGSM" @bind="userInput" />
+    <button @onclick="AddOGSM">Add OGSM</button>
+    @if (errorMessage != null)
+    {
+        <p style="color: red;">@errorMessage</p>
+    }
+</div>
+
+
+@foreach (var input in inputList)
+{
+    <button style="min-width: 100px; min-height: 40px; background-color: green; color: white; border: 2px solid green; margin-top: 10px; margin-left: 20px" @onclick="(() => MovetoOGSM(input.ID))">@input.Title</button>
+}
+
+

@@ -1,0 +1,102 @@
+@using Model
+<PageTitle>Actions_Overview</PageTitle>
+
+@code {
+    private static Guid Manager_ID {get; set;}
+    protected override void OnInitialized()
+    {
+        // Get the URL
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+
+        // Get the query parameters
+        var queryString = uri.Query;
+
+        // Parse the query string to retrieve specific parameters
+        var queryParameters = System.Web.HttpUtility.ParseQueryString(queryString);
+
+        // Retrieve the 'ID' parameter
+        var stringID = queryParameters["ID"];
+
+        // Convert to Guid
+        Manager_ID = new Guid(stringID);
+      
+        inputList = Load();
+    }
+}
+
+<h1>(@inputList.Count())</h1>
+
+
+<style>
+    /* Define a custom class for the checkbox */
+    .larger-checkbox input[type="checkbox"] {
+        /* Increase the size of the checkbox */
+        transform: scale(1.5);
+    }
+</style>
+
+
+
+<ul>
+    @foreach (var action in inputList)
+    {
+        <!-- Apply the custom class to the checkbox -->
+        <div class="larger-checkbox">
+            <input type="checkbox" @bind="action.IsDone" onclick="@(() => HandleCheckboxClick(action))"/>
+            <textarea @bind="action.Title" readonly></textarea>
+            @{
+                var maxLength = 50; 
+
+                // Checking the length of the text and adding a newline if it exceeds maxLength
+                if (action.Title.Length > maxLength)
+                {
+                    action.Title = action.Title.Substring(0, maxLength) + "\n" + action.Title.Substring(maxLength);
+                }
+            }
+        </div>
+    }
+</ul>
+
+@code{
+    void HandleCheckboxClick(TodoItem action)
+    {
+        foreach (var act in inputList)
+        {
+            if (action == act)
+            {
+                UncheckAllExcept(action);
+            }
+        }
+    }
+
+    void UncheckAllExcept(TodoItem action)
+    {
+        foreach (var act in inputList)
+        {
+            if (action != act)
+            {
+                act.IsDone = false;
+            }
+        }
+    }
+}
+
+@code {
+    [Inject]
+    private NavigationManager NavigationManager { get; set; }
+}
+
+@code {
+
+    private List<TodoItem> inputList = new List<TodoItem>();
+    private static List<TodoItem> Load()
+    {
+        List<TodoItem> Actions_For_This_Manager = Controller_Actions.GetAllActions(Manager_ID);
+        
+        if (Actions_For_This_Manager.Count() == 0)
+        {
+            Console.WriteLine("No actions found for this manager");
+        }
+        return Actions_For_This_Manager;
+    }
+}

@@ -1,0 +1,65 @@
+<PageTitle>Dashboard</PageTitle>
+
+
+<CircleDiagram MaxItems=@maxItems FinishedItems=@finishedItems />
+
+@code {
+    private static Guid OGSM_ID {get; set;}
+    protected override void OnInitialized()
+    {
+        // Get the URL
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+
+        // Get the query parameters
+        var queryString = uri.Query;
+
+        // Parse the query string to retrieve specific parameters
+        var queryParameters = System.Web.HttpUtility.ParseQueryString(queryString);
+
+        // Retrieve the 'ID' parameter
+        var stringID = queryParameters["ID"];
+
+        // Convert to Guid
+        OGSM_ID = new Guid(stringID);
+
+        Console.WriteLine($"Dashboard OGSM ID: {OGSM_ID}");
+        Load();
+    }
+}
+
+@code {
+    [Inject]
+    private NavigationManager NavigationManager { get; set; }
+}
+
+@code {
+    public static int maxItems { get; set; }
+    public static int finishedItems { get; set; }
+
+    private static void Load()
+        {
+            Model.OGSM current_OGSM = Controller_OGSMs.GetOGSM_byID(OGSM_ID);
+            maxItems = 0;
+            finishedItems = 0;
+            
+            if (current_OGSM is not null)
+            {
+                List<TodoItem> actions = Controller_Actions.GetActions(current_OGSM);
+                if (actions is not null)
+                {
+                    foreach (TodoItem todo in actions)
+                    {
+                        if(todo.Done)
+                        {
+                            finishedItems += 1;
+                        }
+                    }
+
+                    maxItems = actions.Count();
+                    return;
+                }
+            }
+            
+            Console.WriteLine("OGSM not found");
+        }
+}

@@ -1,0 +1,27 @@
+@inherits Microsoft.AspNetCore.Components.ComponentBase
+
+
+<div>
+    <svg height="200" width="200">
+        <!-- Circle representing the "not done" part -->
+        <circle cx="100" cy="100" r="80" stroke="#f0f0f0" stroke-width="40" fill="none" />
+
+        <!-- Circle representing the "done" part in red -->
+        <circle cx="100" cy="100" r="80" stroke="none" fill="transparent"
+                style="stroke-dasharray: calc((@FinishedItems / @MaxItems) * 502px), 502px; 
+                       stroke-width: 40; 
+                       transition: stroke-dasharray 1s ease; 
+                       transform: rotate(-90deg); transform-origin: 50% 50%;
+                       stroke: #FF0000;" />
+    </svg>
+    <p>Finished Actions: @FinishedItems / @MaxItems</p>
+</div>
+
+
+@code {
+    [Parameter]
+    public int MaxItems { get; set; }
+    [Parameter]
+    public int FinishedItems { get; set; }
+
+}

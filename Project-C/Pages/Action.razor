@@ -1,0 +1,153 @@
+@using Model
+<PageTitle>Action</PageTitle>
+
+@code {
+    private static Guid OGSM_ID {get; set;}
+    protected override void OnInitialized()
+    {
+        // Get the URL
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+
+        // Get the query parameters
+        var queryString = uri.Query;
+
+        // Parse the query string to retrieve specific parameters
+        var queryParameters = System.Web.HttpUtility.ParseQueryString(queryString);
+
+        // Retrieve the 'ID' parameter
+        var stringID = queryParameters["ID"];
+
+        // Convert to Guid
+        OGSM_ID = new Guid(stringID);
+
+        Console.WriteLine($"Action OGSM ID: {OGSM_ID}");
+        inputList = Load();
+    }
+}
+
+<h1>(@inputList.Count())</h1>
+
+
+<style>
+    /* Define a custom class for the checkbox */
+    .larger-checkbox input[type="checkbox"] {
+        /* Increase the size of the checkbox */
+        transform: scale(1.5);
+    }
+</style>
+
+
+
+<ul>
+    @foreach (var action in inputList)
+    {
+        <!-- Apply the custom class to the checkbox -->
+        <div class="larger-checkbox">
+            <input type="checkbox" @bind="action.IsDone" onclick="@(() => HandleCheckboxClick(action))"/>
+            <textarea @bind="action.Title" readonly></textarea>
+            @{
+                var maxLength = 50; 
+
+                // Checking the length of the text and adding a newline if it exceeds maxLength
+                if (action.Title.Length > maxLength)
+                {
+                    action.Title = action.Title.Substring(0, maxLength) + "\n" + action.Title.Substring(maxLength);
+                }
+            }
+        </div>
+    }
+</ul>
+
+@code{
+    void HandleCheckboxClick(TodoItem action)
+    {
+        foreach (var act in inputList)
+        {
+            if (action == act)
+            {
+                UncheckAllExcept(action);
+            }
+        }
+    }
+
+    void UncheckAllExcept(TodoItem action)
+    {
+        foreach (var act in inputList)
+        {
+            if (action != act)
+            {
+                act.IsDone = false;
+            }
+        }
+    }
+}
+
+@code {
+    [Inject]
+    private NavigationManager NavigationManager { get; set; }
+}
+
+
+<input placeholder="New Action" @bind="userInput" />
+<button @onclick="Add">Add New</button>
+<button onclick="@(() => Update("Update"))">Update</button>
+<button onclick="@(() => Update("Done"))">(Un)finished</button>
+
+@code {
+
+    private string userInput = "";
+    private List<TodoItem> inputList = new List<TodoItem>();
+
+    private void Add()
+    {
+        if (userInput != null && userInput != "")
+        {
+            Model.Actions new_action = new(Guid.NewGuid(), userInput);
+            Controller_Actions.AddAction(OGSM_ID, new_action);
+            inputList.Add(new TodoItem { ID = new_action.ID, Title = new_action.Name });
+            userInput = "";
+            Console.WriteLine($"Actions ID {new_action.ID}");
+            NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
+        }
+    }
+
+    private void Update(string option)
+    {
+        foreach (var action in inputList)
+        {
+            if (action.IsDone)
+            {
+                if (option is not null && option == "Update")
+                {
+                    if (userInput != null && userInput != "")
+                        {
+                            Controller_Actions.UpdateAction(action.ID, userInput);
+                            action.Title = userInput;
+                            userInput = "";
+                            Console.WriteLine($"Updated Action ID {action.ID}");
+                        }
+                }
+                
+                if (option is not null && option == "Done")
+                {
+                    Controller_Actions.UpdateAction(action.ID, "g9f31rg97gf3uoufaf9af7uef79hudosf9979w");
+                    Console.WriteLine($"Updated Action Done ID {action.ID}");
+                    NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
+                }
+            }
+        }
+    }
+
+    private static List<TodoItem> Load()
+    {
+        Model.OGSM current_OGSM = Controller_OGSMs.GetOGSM_byID(OGSM_ID);
+        
+        if (current_OGSM is not null)
+        {
+            return Controller_Actions.GetActions(current_OGSM);
+        }
+        
+        Console.WriteLine("OGSM not found");
+        return new List<TodoItem>();
+    }
+}

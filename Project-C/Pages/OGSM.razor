@@ -1,0 +1,83 @@
+@page "/OGSM"
+
+<PageTitle>OGSM</PageTitle>
+<h1>OGSM</h1>
+
+
+<div class="container">
+    <div class="box ambitie">
+        <p>Ambition</p>
+        <Ambitie />
+    </div>
+
+    <div class="box doelstellingen">
+        <p>Goals</p>
+        <Goal />
+    </div>
+
+    <div class="box strategie">
+        <p>Strategies</p>
+        <Strategie />
+    </div>
+
+    <div class="box voortgang">
+        <p>Dashboard</p>
+        <Dashboard />
+    </div>
+
+    <div class="box actiepunten">
+        <p>Actions</p>
+        <Action />
+    </div>
+</div>
+
+
+<style>
+    .container {
+        position: relative;
+    }
+
+    .box {
+        position: absolute;
+        background-color: green;
+        color: white;
+        padding: 20px;
+        width: 300px;
+    }
+
+    .ambitie {
+        top: 0;
+        left: -100px;
+        width: 1350px;
+        height: 100px;
+    }
+
+    .doelstellingen {
+        top: 150px;
+        left: -100px; 
+        height: 600px; 
+    }
+
+    .strategie {
+        top: 150px;
+        left: 250px; 
+        height: 600px; 
+    }
+
+    .voortgang {
+        top: 150px;
+        left: 600px;
+        height: 600px; 
+    }
+
+    .actiepunten {
+        top: 150px;
+        left: 950px;
+        height: 600px; 
+    }
+</style>
+
+
+
+
+
