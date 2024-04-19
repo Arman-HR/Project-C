@@ -125,7 +125,7 @@
 </div>
 
 <div class="CreateAccountButton-container">
-    @* <button class="custom-button" @onclick="CreateAccount">Create Account</button> *@
+    <button class="custom-button" @onclick="CreateAccount">Create Account</button>
 </div>
 
 <div>Project C: Arman, Jesse, Ying-Yu</div>
@@ -185,7 +185,7 @@
 
         List<Users> new_managers = new List<Users>()
         {
-            // Your new manager accounts:
+            new Users(Guid.NewGuid(), "managerx@email.com", "firstname", "lastname", "managerx", managertype)
         
         };
 
